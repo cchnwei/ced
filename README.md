@@ -1,1 +1,1 @@
-ced：為自行設計除法器
+ced：design a divider
