@@ -85,9 +85,9 @@ module  CED(
   assign read_enable = (crd_ang_0||crd_mag_0);
   assign boundary = (boundary0 & column_cnt!=0);
   assign read_done = (read0_done||read1_done||read2_done);
-  assign jump_to_write0 = (read2_cnt==3 && hys_data>=13'd100); // 如果current pixel>=100，直接跳WRITE state
-  assign jump_to_write1 = (read2_cnt==3 && hys_data<13'd50);   // 如果current pixel<50，直接跳WRITE state
-  assign jump_to_write2 = (read2_cnt>=4 && read2_cnt<=12 && hys_data>=13'd100);   // 如果pixel around the current pixel>=100，直接跳WRITE state
+  assign jump_to_write0 = (read2_cnt==3 && hys_data>=13'd100); // if current pixel>=100，jump to WRITE state
+  assign jump_to_write1 = (read2_cnt==3 && hys_data<13'd50);   // if current pixel<50，jump to WRITE state
+  assign jump_to_write2 = (read2_cnt>=4 && read2_cnt<=12 && hys_data>=13'd100);   // if pixel around the current pixel>=100，jump to WRITE state
   assign jump_to_write  = (jump_to_write0||jump_to_write1||jump_to_write2);
   assign done = layer2_done;
   //
@@ -249,7 +249,7 @@ module  CED(
     end else begin
       if (layer1_done) begin
         column_cnt <= 0;
-      end else if (column_cnt!=8'd125 && inner_cs==WRITE) begin // 如果寫(column_cnt!=8'd125 && cwr_mag_0)的話在其他top-level的state不能用，因為cwr_mag_0只有在layer0才有，所以要改成inner_cs==WRITE才可以在每一個top-level的state使用
+      end else if (column_cnt!=8'd125 && inner_cs==WRITE) begin
         column_cnt <= column_cnt_up;
       end else if (column_cnt==8'd125 && inner_cs==WRITE) begin
         column_cnt <= 0;
@@ -534,7 +534,7 @@ module  CED(
   //
 
   // gx conv output
-  reg  [9:0] idata_buffer_x; // 不能 define reg [8:0] idata_buffer_x, 必須[9:0]多一個signed-bit
+  reg  [9:0] idata_buffer_x; // cannot define reg [8:0] idata_buffer_x, must have one more signed-bit [9:0]
   wire [8:0] idata_mul2;
   assign idata_mul2 = idata<<1;
 
@@ -595,7 +595,7 @@ module  CED(
   //
 
   // gy conv output
-  reg  [9:0] idata_buffer_y; // 不能 define reg [8:0] idata_buffer_y, 必須[9:0]多一個signed-bit
+  reg  [9:0] idata_buffer_y; // cannot define reg [8:0] idata_buffer_y, must have one more signed-bit [9:0]
 
   always @(posedge clk, posedge rst) begin
     if (rst) begin
@@ -648,7 +648,7 @@ module  CED(
   //
 
   // gx conv
-  wire [12:0] gx_pixel_sum; // 每次的idata跟上次存進gx_pixel的值的加總，加完存進gx_pixel，下一次再把idata跟gx_pixel抓出來做加總
+  wire [12:0] gx_pixel_sum; // accumulate gx_pixel
   assign gx_pixel_sum = $signed(gx_pixel)+$signed(idata_buffer_x);
 
   always @(posedge clk, posedge rst) begin
@@ -665,7 +665,7 @@ module  CED(
   //
 
   // gy conv
-  wire [12:0] gy_pixel_sum; // gy_pixel的加總
+  wire [12:0] gy_pixel_sum; // accumulate gy_pixel
   assign gy_pixel_sum = $signed(gy_pixel)+$signed(idata_buffer_y);
 
   always @(posedge clk, posedge rst) begin
@@ -1310,9 +1310,9 @@ module divider2 (
         merchant <= 0;
       end else begin
         if (udividend_reg>=udivisor && read0_cnt>=12) begin
-          merchant <= merchant_shf_up;  // 商為1
+          merchant <= merchant_shf_up;  // merchant is 1
         end else begin
-          merchant <= merchant_shf;     // 商為0
+          merchant <= merchant_shf;     // merchant is 0
         end
       end
     end
@@ -1329,7 +1329,7 @@ module divider2 (
     end else begin
       remainder <= udividend_reg;
       if (udividend_reg>=udivisor) begin
-        remainder <= remainder0; // 求餘數
+        remainder <= remainder0; // find the remainder
       end
     end
   end
