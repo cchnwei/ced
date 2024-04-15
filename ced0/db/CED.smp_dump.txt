@@ -1,6 +1,0 @@
-
-State Machine - |CED|inner_cs
-Name inner_cs.READ inner_cs.WRITE inner_cs.EXECUTE 
-inner_cs.READ 0 0 0 
-inner_cs.EXECUTE 1 0 1 
-inner_cs.WRITE 1 1 0 

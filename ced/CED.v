@@ -1008,7 +1008,7 @@ module divider2 (
   reg        sign;
   reg [28:0] udividend; // unsigned dividend
   reg [12:0] udivisor;  // unsigned divisor
-  reg [12:0] udividend_reg;
+  reg [13:0] udividend_reg;
   reg [28:0] merchant;
   reg [12:0] remainder;
   //
