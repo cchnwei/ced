@@ -85,9 +85,9 @@ module  CED(
   assign read_enable = (crd_ang_0||crd_mag_0);
   assign boundary = (boundary0 & column_cnt!=0);
   assign read_done = (read0_done||read1_done||read2_done);
-  assign jump_to_write0 = (read2_cnt==3 && hys_data>=13'd100); // if current pixel>=100，jump to WRITE state
-  assign jump_to_write1 = (read2_cnt==3 && hys_data<13'd50);   // if current pixel<50，jump to WRITE state
-  assign jump_to_write2 = (read2_cnt>=4 && read2_cnt<=12 && hys_data>=13'd100);   // if pixel around the current pixel>=100，jump to WRITE state
+  assign jump_to_write0 = (read2_cnt==3 && hys_data>=13'd100); // 如果current pixel>=100，直接跳WRITE state
+  assign jump_to_write1 = (read2_cnt==3 && hys_data<13'd50);   // 如果current pixel<50，直接跳WRITE state
+  assign jump_to_write2 = (read2_cnt>=4 && read2_cnt<=12 && hys_data>=13'd100);   // 如果pixel around the current pixel>=100，直接跳WRITE state
   assign jump_to_write  = (jump_to_write0||jump_to_write1||jump_to_write2);
   assign done = layer2_done;
   //
@@ -249,7 +249,7 @@ module  CED(
     end else begin
       if (layer1_done) begin
         column_cnt <= 0;
-      end else if (column_cnt!=8'd125 && inner_cs==WRITE) begin
+      end else if (column_cnt!=8'd125 && inner_cs==WRITE) begin // 如果寫(column_cnt!=8'd125 && cwr_mag_0)的話在其他top-level的state不能用，因為cwr_mag_0只有在layer0才有，所以要改成inner_cs==WRITE才可以在每一個top-level的state使用
         column_cnt <= column_cnt_up;
       end else if (column_cnt==8'd125 && inner_cs==WRITE) begin
         column_cnt <= 0;
@@ -369,79 +369,83 @@ module  CED(
   //
 
   // p0 address logic
-  reg  [13:0] p0_addr1; 
+  wire [13:0] p0_addr1; 
+  reg  [14:0] var1;
+  assign p0_addr1=p0_addr+var1; // with time sharing
 
   always @(*) begin
-    p0_addr1 = 0;
+    var1 = 0;
     case (read0_cnt)
       0: // p0_addr
         begin
-          p0_addr1=p0_addr-14'd129;
+          var1 = -14'd129;
         end
       1: // p1_addr
         begin
-          p0_addr1=p0_addr-14'd128;
+          var1 = -14'd128;
         end
       2: // p2_addr
         begin
-          p0_addr1=p0_addr-14'd127;
+          var1 = -14'd127;
         end
       3: // p3_addr
         begin
-          p0_addr1=p0_addr-14'd1;
+          var1 = -14'd1;
         end
       4: // p4_addr
         begin
-          p0_addr1=p0_addr;
+          var1 = 0;
         end
       5: // p5_addr
         begin
-          p0_addr1=p0_addr+14'd1;
+          var1 = 14'd1;
         end
       6: // p6_addr
         begin
-          p0_addr1=p0_addr+14'd127;
+          var1 = 14'd127;
         end
       7: // p7_addr
         begin
-          p0_addr1=p0_addr+14'd128;
+          var1 = 14'd128;
         end
       8: // p8_addr
         begin
-          p0_addr1=p0_addr+14'd129;
+          var1 = 14'd129;
         end
     endcase
   end
   //
 
   // p1 address logic
-  reg  [13:0] p1_addr1; 
+  wire [13:0] p1_addr1;
+  reg [14:0] var2;
+  assign p1_addr1=p1_addr+var2; // with time sharing
 
   always @(*) begin
-    p1_addr1 = p1_addr;
+    var2 = 0;
     case (read1_cnt)
       3:
         begin
           if (cdata_ang_rd0==13'd0) begin
-            p1_addr1=p1_addr-14'd1;
+            var2 = -14'd1;
           end else if (cdata_ang_rd0==13'd135) begin
-            p1_addr1=p1_addr-14'd127;
+            var2 = -14'd127;
           end else if (cdata_ang_rd0==13'd90) begin
-            p1_addr1=p1_addr-14'd126;
+            var2 = -14'd126;
           end else begin // 45
-            p1_addr1=p1_addr-14'd125;
+            var2 = -14'd125;
           end
         end
       4:
         begin
           if (cdata_ang_rd0==13'd0) begin
-            p1_addr1=p1_addr+14'd1;
+            var2 = 14'd1;
           end else if (cdata_ang_rd0==13'd135) begin
-            p1_addr1=p1_addr+14'd127;
+            var2 = 14'd127;
           end else if (cdata_ang_rd0==13'd90) begin
-            p1_addr1=p1_addr+14'd126;
+            var2 = 14'd126;
           end else begin // 45
-            p1_addr1=p1_addr+14'd125;
+            var2 = 14'd125;
           end
         end
     endcase
@@ -449,35 +453,35 @@ module  CED(
       case (read2_cnt)
         3: 
           begin
-            p1_addr1=p1_addr-14'd127;
+            var2 = -14'd127;
           end
         4: 
           begin
-            p1_addr1=p1_addr-14'd126;
+            var2 = -14'd126;
           end
         5: 
           begin
-            p1_addr1=p1_addr-14'd125;
+            var2 = -14'd125;
           end
         6: 
           begin
-            p1_addr1=p1_addr-14'd1;
+            var2 = -14'd1;
           end
         7: 
           begin
-            p1_addr1=p1_addr+14'd1;
+            var2 = 14'd1;
           end
         8: 
           begin
-            p1_addr1=p1_addr+14'd125;
+            var2 = 14'd125;
           end
         9: 
           begin
-            p1_addr1=p1_addr+14'd126;
+            var2 = 14'd126;
           end
         10: 
           begin
-            p1_addr1=p1_addr+14'd127;
+            var2 = 14'd127;
           end
       endcase
     end
@@ -534,7 +538,7 @@ module  CED(
   //
 
   // gx conv output
-  reg  [9:0] idata_buffer_x; // cannot define reg [8:0] idata_buffer_x, must have one more signed-bit [9:0]
+  reg  [9:0] idata_buffer_x; // 不能 define reg [8:0] idata_buffer_x, 必須[9:0]多一個signed-bit
   wire [8:0] idata_mul2;
   assign idata_mul2 = idata<<1;
 
@@ -595,7 +599,7 @@ module  CED(
   //
 
   // gy conv output
-  reg  [9:0] idata_buffer_y; // cannot define reg [8:0] idata_buffer_y, must have one more signed-bit [9:0]
+  reg  [9:0] idata_buffer_y; // 不能 define reg [8:0] idata_buffer_y, 必須[9:0]多一個signed-bit
 
   always @(posedge clk, posedge rst) begin
     if (rst) begin
@@ -648,7 +652,7 @@ module  CED(
   //
 
   // gx conv
-  wire [12:0] gx_pixel_sum; // accumulate gx_pixel
+  wire [12:0] gx_pixel_sum; // 每次的idata跟上次存進gx_pixel的值的加總，加完存進gx_pixel，下一次再把idata跟gx_pixel抓出來做加總
   assign gx_pixel_sum = $signed(gx_pixel)+$signed(idata_buffer_x);
 
   always @(posedge clk, posedge rst) begin
@@ -665,7 +669,7 @@ module  CED(
   //
 
   // gy conv
-  wire [12:0] gy_pixel_sum; // accumulate gy_pixel
+  wire [12:0] gy_pixel_sum; // gy_pixel的加總
   assign gy_pixel_sum = $signed(gy_pixel)+$signed(idata_buffer_y);
 
   always @(posedge clk, posedge rst) begin
@@ -1008,7 +1012,7 @@ module divider2 (
   reg        sign;
   reg [28:0] udividend; // unsigned dividend
   reg [12:0] udivisor;  // unsigned divisor
-  reg [13:0] udividend_reg;
+  reg [13:0] udividend_reg; // 要比餘數多1bit
   reg [28:0] merchant;
   reg [12:0] remainder;
   //
@@ -1027,7 +1031,7 @@ module divider2 (
   end
 
   always @(*) begin
-    div_ns = div_cs;
+    div_ns = 5'bxxxxx;
     case (div_cs)
       S0:
         begin
@@ -1301,7 +1305,6 @@ module divider2 (
   assign merchant_shf = (merchant<<1);
   assign merchant_shf_up = (merchant<<1)+1;
 
-
   always @(posedge clk, posedge rst) begin
     if (rst) begin
       merchant <= 0;
@@ -1310,9 +1313,9 @@ module divider2 (
         merchant <= 0;
       end else begin
         if (udividend_reg>=udivisor && read0_cnt>=12) begin
-          merchant <= merchant_shf_up;  // merchant is 1
+          merchant <= merchant_shf_up;  // 商為1
         end else begin
-          merchant <= merchant_shf;     // merchant is 0
+          merchant <= merchant_shf;     // 商為0
         end
       end
     end
@@ -1329,7 +1332,7 @@ module divider2 (
     end else begin
       remainder <= udividend_reg;
       if (udividend_reg>=udivisor) begin
-        remainder <= remainder0; // find the remainder
+        remainder <= remainder0; // 求餘數
       end
     end
   end
