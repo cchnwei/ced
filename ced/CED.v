@@ -1031,7 +1031,7 @@ module divider2 (
   end
 
   always @(*) begin
-    div_ns = 5'bxxxxx;
+    div_ns = div_cs;
     case (div_cs)
       S0:
         begin
