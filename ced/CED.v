@@ -42,10 +42,10 @@ module  CED(
   //
 
   // define reg or wire
-  reg  [2:0]  top_cs;
-  reg  [2:0]  top_ns;
-  reg  [2:0]  inner_cs;
-  reg  [2:0]  inner_ns;
+  reg  [1:0]  top_cs;
+  reg  [1:0]  top_ns;
+  reg  [1:0]  inner_cs;
+  reg  [1:0]  inner_ns;
   reg  [13:0] p0_addr; // layer0
   reg  [13:0] p1_addr; // layer1
   reg  [12:0] gx_pixel;
